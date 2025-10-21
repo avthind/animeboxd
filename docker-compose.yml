@@ -1,0 +1,70 @@
+# Docker Compose Configuration for Local Development
+# Usage: docker-compose up -d
+
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: animeboxd-db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - animeboxd-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: animeboxd-api
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      - NODE_ENV=production
+      - PORT=9000
+      - MONGO_URI=mongodb://admin:password@mongodb:27017/animeboxd?authSource=admin
+      - JWT_SECRET=your_jwt_secret_change_in_production
+    depends_on:
+      - mongodb
+    networks:
+      - animeboxd-network
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
+  # Frontend (Development)
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: animeboxd-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:9000/api
+    depends_on:
+      - backend
+    networks:
+      - animeboxd-network
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+
+networks:
+  animeboxd-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+

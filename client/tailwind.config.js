@@ -1,0 +1,77 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [
+    require("daisyui"),
+    function({ addBase }) {
+      addBase({
+        ':root[data-theme="badfreak"]': {
+          'color-scheme': 'light',
+          '--color-base-100': 'oklch(96% 0.018 272.314)',
+          '--color-base-200': 'oklch(21% 0.006 285.885)',
+          '--color-base-300': 'oklch(27% 0.006 286.033)',
+          '--color-base-content': 'oklch(35% 0.144 278.697)',
+          '--color-primary': 'oklch(59% 0.249 0.584)',
+          '--color-primary-content': 'oklch(97% 0.014 343.198)',
+          '--color-secondary': 'oklch(68% 0.162 75.834)',
+          '--color-secondary-content': 'oklch(98% 0.026 102.212)',
+          '--color-accent': 'oklch(0% 0 0)',
+          '--color-accent-content': 'oklch(100% 0 0)',
+          '--color-neutral': 'oklch(27% 0.006 286.033)',
+          '--color-neutral-content': 'oklch(98% 0 0)',
+          '--color-info': 'oklch(71% 0.143 215.221)',
+          '--color-info-content': 'oklch(98% 0.019 200.873)',
+          '--color-success': 'oklch(69% 0.17 162.48)',
+          '--color-success-content': 'oklch(98% 0.014 180.72)',
+          '--color-warning': 'oklch(79% 0.184 86.047)',
+          '--color-warning-content': 'oklch(98% 0.026 102.212)',
+          '--color-error': 'oklch(63% 0.237 25.331)',
+          '--color-error-content': 'oklch(97% 0.013 17.38)',
+          '--radius-selector': '0.5rem',
+          '--radius-field': '0.25rem',
+          '--radius-box': '0.25rem',
+          '--size-selector': '0.25rem',
+          '--size-field': '0.25rem',
+          '--border': '1.5px',
+          '--depth': '0',
+          '--noise': '0',
+        },
+      });
+    },
+  ],
+  daisyui: {
+    themes: [
+      {
+        badfreak: {
+          "color-scheme": "light",
+          "primary": "oklch(59% 0.249 0.584)",
+          "primary-content": "oklch(97% 0.014 343.198)",
+          "secondary": "oklch(68% 0.162 75.834)",
+          "secondary-content": "oklch(98% 0.026 102.212)",
+          "accent": "oklch(0% 0 0)",
+          "accent-content": "oklch(100% 0 0)",
+          "neutral": "oklch(27% 0.006 286.033)",
+          "neutral-content": "oklch(98% 0 0)",
+          "base-100": "oklch(96% 0.018 272.314)",
+          "base-200": "oklch(21% 0.006 285.885)",
+          "base-300": "oklch(27% 0.006 286.033)",
+          "base-content": "oklch(35% 0.144 278.697)",
+          "info": "oklch(71% 0.143 215.221)",
+          "info-content": "oklch(98% 0.019 200.873)",
+          "success": "oklch(69% 0.17 162.48)",
+          "success-content": "oklch(98% 0.014 180.72)",
+          "warning": "oklch(79% 0.184 86.047)",
+          "warning-content": "oklch(98% 0.026 102.212)",
+          "error": "oklch(63% 0.237 25.331)",
+          "error-content": "oklch(97% 0.013 17.38)",
+        },
+      },
+    ],
+  },
+};

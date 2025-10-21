@@ -1,0 +1,111 @@
+# GitHub Actions Workflow for Continuous Deployment to AWS EC2
+# 
+# Setup Instructions:
+# 1. Go to GitHub Repository Settings > Secrets and variables > Actions
+# 2. Add the following secrets:
+#    - EC2_SSH_KEY: Your EC2 private key (.pem file contents)
+#    - EC2_HOST: Your EC2 public DNS or IP address
+#    - EC2_USERNAME: SSH username (usually 'ubuntu' for Ubuntu AMI)
+
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to main branch
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      
+      - name: Deploy to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USERNAME: ${{ secrets.EC2_USERNAME }}
+        run: |
+          # Save private key to file
+          echo "$PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          
+          # Deploy to EC2
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${USERNAME}@${HOST} << 'EOF'
+            # Navigate to project directory
+            cd /home/ubuntu/animeboxd
+            
+            # Pull latest changes
+            git pull origin main
+            
+            # Deploy Backend
+            echo "Deploying backend..."
+            cd server
+            npm install --production
+            pm2 restart animeboxd-api || pm2 start ecosystem.config.js --env production
+            
+            # Deploy Frontend
+            echo "Deploying frontend..."
+            cd ../client
+            npm install
+            npm run build
+            sudo cp -r dist/* /var/www/html/animeboxd/
+            
+            # Restart Nginx
+            sudo systemctl reload nginx
+            
+            echo "Deployment completed successfully!"
+          EOF
+          
+          # Cleanup
+          rm -f private_key.pem
+      
+      - name: Notify Deployment Status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ Deployment successful!"
+          else
+            echo "❌ Deployment failed!"
+          fi
+
+  # Optional: Add a job to run tests before deployment
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      
+      - name: Install Backend Dependencies
+        run: |
+          cd server
+          npm install
+      
+      - name: Install Frontend Dependencies
+        run: |
+          cd client
+          npm install
+      
+      # Add your test commands here
+      # - name: Run Backend Tests
+      #   run: cd server && npm test
+      
+      # - name: Run Frontend Tests
+      #   run: cd client && npm test
+
